@@ -1,6 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+# References
+# https://stackoverflow.com/questions/53526207/how-do-i-add-a-row-of-dashes-between-the-first-two-print-lines-in-python
+
 from PySimpleAutomata import automata_IO
 import json
 
@@ -14,6 +17,13 @@ class COMP5361:
         self.initial_states = []
         self.accepting_states = []
         self.transitions = []
+        self.dfa_initial_states = []
+        self.dfa_transitions = []
+        self.dfa_result_transition = []
+        self.dfa_states = []
+        self.dfa_state_list = []
+        self.dfa_result_states = []
+        self.dfa_accepting_states = []
 
     def setData(self, key, value):
         self.data.update({key: value})
@@ -35,6 +45,7 @@ class COMP5361:
 
     def setInitialstates(self, initial_states):
         self.initial_states = sorted(initial_states)
+        self.setDfainitialstates(self.getInitialstates())
 
     def getInitialstates(self, is_dfa=False):
         if is_dfa:
@@ -53,6 +64,50 @@ class COMP5361:
 
     def getTransitions(self):
         return self.transitions
+
+    def setDfastate_list(self, state):
+        self.dfa_state_list.append(state)
+
+    def getDfastate_list(self):
+        return self.dfa_state_list
+
+    def setDfastates(self, state):
+        self.dfa_states.append(state)
+
+    def getDfastates(self):
+        return self.dfa_states
+
+    def setDfaresultstates(self, state):
+        self.dfa_result_states.append(state)
+
+    def getDfaresultstates(self):
+        return self.dfa_result_states
+
+    def setDfainitialstates(self, initial_states):
+        self.dfa_initial_states = sorted(initial_states)
+
+    def getDfainitialstates(self):
+        if self.initial_states:
+            return self.initial_states[0]
+        return []
+
+    def setDfaacceptingstates(self, accepting_state):
+        self.dfa_accepting_states.append(accepting_state)
+
+    def getDfaacceptingstates(self):
+        return self.dfa_accepting_states
+
+    def setDfatransitions(self, transition):
+        self.dfa_transitions.append(transition)
+
+    def getDfatransitions(self):
+        return self.dfa_transitions
+
+    def setDfaresulttransitions(self, transitions):
+        self.dfa_result_transition.append(transitions)
+
+    def getDfaresulttransitions(self):
+        return self.dfa_result_transition
 
     def read_and_store_alphabets(self):
         alphabets = input("\nEnter alphabet(s), if multiple then seperate by comma : ")
@@ -200,6 +255,124 @@ class COMP5361:
             print("{} => {} => {}".format(transition[0], transition[1], transition[2]))
         self.setData("transitions", transitions_list)
 
+    def get_end_state(self, start, op):
+        return_list = []
+        for trans in self.getTransitions():
+            if start == trans[0] and op == trans[1]:
+                if trans[2] not in return_list:
+                    return_list.append(trans[2])
+        return ",".join(sorted(return_list))
+
+    def update_transitions(self, state):
+        start_states = state.split(",")
+        for op in self.getAlphabet():
+            end_state = []
+            for start in start_states:
+                for trans in self.getTransitions():
+                    if start == trans[0] and op == trans[1]:
+                        if trans[2] not in end_state:
+                            end_state.append(trans[2])
+            if end_state:
+                self.transitions.append([state, op, ",".join(sorted(end_state))])
+
+    def get_result_set_list(self, start):
+        return_list = []
+        for trans in self.getDfatransitions():
+            if trans[0] == start:
+                end_state = trans[-1]
+                if end_state not in return_list:
+                    return_list.append(end_state)
+        return return_list
+
+    def nfa_to_dfa_conversion(self):
+        for state in self.getInitialstates(False):
+            self.setDfastates(state)
+            self.setDfastate_list(state)
+        states = self.getStates()
+        for state in states:
+            if state not in self.getDfastates():
+                self.setDfastate_list(state)
+        for count, state in enumerate(states):
+            for next_state in states[count + 1:]:
+                new_state = ",".join([state, next_state])
+                if new_state not in self.getDfastate_list():
+                    self.setDfastate_list(new_state)
+        new_state = ",".join(states)
+        if new_state not in self.getDfastate_list():
+            self.setDfastate_list(new_state)
+
+        transitions_updated_list = states
+        for state in self.getDfastate_list():
+            for op in self.getAlphabet():
+                if state not in transitions_updated_list:
+                    transitions_updated_list.append(state)
+                    self.update_transitions(state)
+
+        for state in self.getDfastate_list():
+            for op in self.getAlphabet():
+                end_state = self.get_end_state(state, op)
+                if end_state:
+                    self.setDfatransitions([state, op, end_state])
+
+        for state in self.getDfastates():
+            result_list = self.get_result_set_list(state)
+            for res_state in result_list:
+                if res_state not in self.getDfaresultstates():
+                    self.setDfaresultstates(res_state)
+                if res_state not in self.getDfastates():
+                    self.setDfastates(res_state)
+
+        for state in self.getAcceptingstates():
+            for res_state in self.getDfaresultstates():
+                if state in res_state:
+                    self.setDfaacceptingstates(res_state)
+        for state in sorted(self.getDfaresultstates()):
+            for trans in self.dfa_transitions:
+                if trans[0] == state:
+                    self.setDfaresulttransitions([trans[0], trans[1], trans[2]])
+
+    def build_Data(self):
+        self.setData("alphabet", self.getAlphabet())
+        self.setData("initial_state", self.getDfainitialstates())
+        self.setData("states", self.getDfaresultstates())
+        self.setData("accepting_states", self.getDfaacceptingstates())
+        self.setData("transitions", self.getDfaresulttransitions())
+
+    def display_nfa_to_dfa_transition_table(self):
+        display_list = []
+        alphabet_display_list = []
+        alphabet_display_list.append(" ")
+        for op in self.getAlphabet():
+            alphabet_display_list.append(op)
+        display_list.append(alphabet_display_list)
+        display_list.append(["=" * (15), "=" * (7), "=" * (7)])
+        display_list.append(["∅", "∅", "∅"])
+        key_dict = {}
+        for state in self.getDfastate_list():
+            key_dict.update({"{{{}}}".format(state): {}})
+            for op in sorted(self.getAlphabet()):
+                val_dict = key_dict.get("{{{}}}".format(state))
+                val_dict.update({op: "∅"})
+
+        for key, val_dict in key_dict.items():
+            print_list = []
+            print_list.append(key)
+            for op_key, val in val_dict.items():
+                for trans in self.getDfatransitions():
+                    if "{{{}}}".format(trans[0]) == key and trans[1] == op_key:
+                        val_dict.update({op_key: "{{{}}}".format(trans[2])})
+                print_list.append(val_dict.get(op_key))
+            display_list.append(print_list)
+
+        dynamic_length = [max(map(len, colmn)) for colmn in zip(*[[str(word) for word in row] for row in display_list])]
+        tab_formatted = '\t'.join('{{:{}}}'.format(var) for var in dynamic_length)
+        display_table = [tab_formatted.format(*row) for row in [[str(word) for word in row] for row in display_list]]
+        print("\n==============================================================")
+        print('NFA To DFA Transition Table')
+        print("==============================================================")
+        print('\n'.join(display_table))
+        print("==============================================================\n")
+
 # python main method
 if __name__ == '__main__':
 
@@ -261,6 +434,22 @@ if __name__ == '__main__':
                     is_exit = True
 
             if choice in ["2", 2]:
+                instance = COMP5361()
+                instance.read_and_store_alphabets()
+                instance.read_and_store_states()
+                instance.read_and_store_initial_states()
+                instance.read_and_store_accepting_states()
+                instance.read_and_store_nfa_transitions()
+                instance.nfa_to_dfa_conversion()
+                instance.build_Data()
+                instance.display_nfa_to_dfa_transition_table()
+
+                with open("Part2.json", "w") as file:
+                    json.dump(instance.getData(), file)
+
+                dfa = automata_IO.dfa_json_importer('Part2.json')
+                automata_IO.dfa_to_dot(dfa, 'dfa_Part2')
+
                 is_exit = True
 
         elif choice in ["3", 3]:
