@@ -136,7 +136,7 @@ class COMP5361:
                     print("===== Error: Please enter integer number =====")
 
         initial_states = []
-        state_list = self.getStates()
+        state_list = sorted(self.getStates())
         print("\nAvailable state(s) : {}".format(", ".join(state_list)))
         for count in range(num_of_initial_states):
             initial = None
@@ -170,7 +170,7 @@ class COMP5361:
                 print("\n===== Error: Please enter integer number =====")
 
         accepting_states = []
-        state_list = self.getStates()
+        state_list = sorted(self.getStates())
         print("\nAvailable state(s) : {}".format(", ".join(state_list)))
         for count in range(num_of_accepting_states):
             accepting = None
@@ -190,8 +190,8 @@ class COMP5361:
 
     def read_and_store_nfa_transitions(self):
         transitions_list = []
-        state_list = self.getStates()
-        alphabets_list = self.getAlphabet()
+        state_list = sorted(self.getStates())
+        alphabets_list = sorted(self.getAlphabet())
         print("\nAvailable state(s) : {}".format(", ".join(state_list)))
         print("Select next state(s) === Note: if multiple then seperate by comma / hit enter for leaving it empty")
         for state in state_list:
@@ -222,8 +222,8 @@ class COMP5361:
 
     def read_and_store_dfa_transitions(self):
         transitions_list = []
-        state_list = self.getStates()
-        alphabets_list = self.getAlphabet()
+        state_list = sorted(self.getStates())
+        alphabets_list = sorted(self.getAlphabet())
         print("\nAvailable state(s) : {}".format(", ".join(state_list)))
         print("Select next state(s) === Note: hit enter for leaving it empty")
         for state in state_list:
@@ -250,7 +250,7 @@ class COMP5361:
                         break
 
         self.setTransitions(transitions_list)
-        print("\n===== Transition(s) =====")
+        print("\n===== Transition(s) =====\n")
         for transition in self.getTransitions():
             print("{} => {} => {}".format(transition[0], transition[1], transition[2]))
         self.setData("transitions", transitions_list)
