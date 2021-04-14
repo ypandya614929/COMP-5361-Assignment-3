@@ -86,7 +86,9 @@ COMP-5361-Assignment-3
       choice 1: Produce Transition Diagram from Transition table 
       It also produces either NFA or DFA based on selected choice and 
       save it into the same directory with file name "nfa" or "dfa".
-
+   
+   ![NFA](https://github.com/ypandya614929/COMP-5361-Assignment-3/blob/main/nfa.dot.svg?raw=true)
+   
     - choice 2: Produce DFA Transition Diagram and Transition table from 
       NFA Transition table
 
@@ -111,5 +113,4 @@ COMP-5361-Assignment-3
     - It also generates, equivalent DFA image within the same directory with name
       "dfa_Part2".
    
-   
-        
+   ![NFA to Equivalent DFA](https://github.com/ypandya614929/COMP-5361-Assignment-3/blob/main/dfa_Part2.dot.svg?raw=true)
