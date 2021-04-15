@@ -408,6 +408,7 @@ if __name__ == '__main__':
                             is_dfa_nfa_selection_exit = True
                     else:
                         is_dfa_nfa_selection_exit = True
+                        break
 
                     instance = COMP5361()
                     instance.read_and_store_alphabets()
