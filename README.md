@@ -5,6 +5,7 @@ COMP-5361-Assignment-3
     
     virtualenv -p python3.6 env
     source env/bin/activate
+    pip install pysimpleautomata 
 
 ## Run Program
 #### python asgn2.py
